@@ -38,7 +38,7 @@ DEEPSEEK_MODEL = "deepseek-v4-flash"
 # Confidence threshold filtering between stages
 # ============================================================
 
-CONFIDENCE_THRESHOLD = 0.60
+CONFIDENCE_THRESHOLD = 0.70
 
 #actually implemented in stage_3_subgroup.py
 

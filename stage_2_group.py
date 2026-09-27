@@ -498,7 +498,7 @@ def main():
                 continue
 
             # -----------------------------------------------
-            # Ask DeepSeek
+            # Ask LLM
             # -----------------------------------------------
 
             classification = classify_group(

@@ -9,6 +9,7 @@ from pathlib import Path
 
 INPUT_FILE = Path("eclass_family_clean.jsonl")
 
+#context files 
 FAMILIES_FILE = Path("families.md")
 GROUPS_FILE = Path("groups.md")
 SUBGROUPS_FILE = Path("subgroups.md")
@@ -19,6 +20,7 @@ ITEMS_FILE = Path("items.md")
 # STORAGE
 # ============================================================
 
+#lists
 families = []
 groups = []
 subgroups = []
@@ -31,20 +33,20 @@ items = []
 
 with INPUT_FILE.open("r", encoding="utf-8") as infile:
 
-    for line_number, line in enumerate(infile, start=1):
+    for line_number, line in enumerate(infile, start=1):  #(index item) pairs on iteration
 
-        line = line.strip()
+        line = line.strip() # removes whitespaces
 
         if not line:
             continue
 
         try:
-            entry = json.loads(line)
+            entry = json.loads(line) #converts json to dictionary
         except json.JSONDecodeError:
             print(f"WARNING: Invalid JSON on line {line_number}")
             continue
 
-        eclass_id = str(entry.get("id", "")).strip()
+        eclass_id = str(entry.get("id", "")).strip() #id:value , name:value , definition:value
 
         if len(eclass_id) != 8 or not eclass_id.isdigit():
             print(f"WARNING: Invalid ECLASS ID on line {line_number}: {eclass_id}")
@@ -62,6 +64,7 @@ with INPUT_FILE.open("r", encoding="utf-8") as infile:
         # 23 01 01 01 -> Item
         # ----------------------------------------------------
 
+        #appends to lists based on the ECLASS ID structure, which indicates the hierarchy level of the entry
         if eclass_id[2:] == "000000":
             families.append((eclass_id, name, definition))
 
@@ -89,6 +92,7 @@ items.sort(key=lambda x: x[0])
 # MARKDOWN WRITER
 # ============================================================
 
+#see .md output files to check the structure
 def write_markdown(filename, title, entries):
 
     with filename.open("w", encoding="utf-8") as outfile:
