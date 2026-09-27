@@ -6,22 +6,25 @@ from pathlib import Path
 # PROJECT PATHS
 # ============================================================
 
+# This file lives in src/, so BASE_DIR is src/ and the repository
+# root is one level up.
 BASE_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = BASE_DIR.parent
 
 # ECLASS context files
-FAMILIES_FILE = BASE_DIR / "context_files" / "families.md"
-GROUPS_FILE = BASE_DIR / "context_files" / "groups.md"
-SUBGROUPS_FILE = BASE_DIR / "context_files" / "subgroups.md"
-ITEMS_FILE = BASE_DIR / "context_files" / "items.md"
+FAMILIES_FILE = PROJECT_ROOT / "context_files" / "families.md"
+GROUPS_FILE = PROJECT_ROOT / "context_files" / "groups.md"
+SUBGROUPS_FILE = PROJECT_ROOT / "context_files" / "subgroups.md"
+ITEMS_FILE = PROJECT_ROOT / "context_files" / "items.md"
 
 # Input components
-COMPONENTS_FILE = BASE_DIR / "components.xlsx"
+COMPONENTS_FILE = PROJECT_ROOT / "input" / "components.xlsx"
 
 # Stage outputs
-STAGE_1_OUTPUT = BASE_DIR / "outputs" / "stage_1_families.jsonl"
-STAGE_2_OUTPUT = BASE_DIR / "outputs" / "stage_2_groups.jsonl"
-STAGE_3_OUTPUT = BASE_DIR / "outputs" / "stage_3_subgroups.jsonl"
-STAGE_4_OUTPUT = BASE_DIR / "outputs" / "stage_4_items.jsonl"
+STAGE_1_OUTPUT = PROJECT_ROOT / "outputs" / "stage_1_families.jsonl"
+STAGE_2_OUTPUT = PROJECT_ROOT / "outputs" / "stage_2_groups.jsonl"
+STAGE_3_OUTPUT = PROJECT_ROOT / "outputs" / "stage_3_subgroups.jsonl"
+STAGE_4_OUTPUT = PROJECT_ROOT / "outputs" / "stage_4_items.jsonl"
 
 
 # ============================================================

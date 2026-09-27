@@ -2,9 +2,14 @@
 import json
 from pathlib import Path
 
+# This script lives in first_cleaning/ and operates on files in the
+# same folder, so paths are anchored to the script location rather
+# than the current working directory.
+SCRIPT_DIR = Path(__file__).resolve().parent
+
 # Input/output files
-INPUT_FILE = Path("eclass_clean.jsonl")
-OUTPUT_FILE = Path("eclass_family_clean.jsonl")
+INPUT_FILE = SCRIPT_DIR / "eclass_clean.jsonl"
+OUTPUT_FILE = SCRIPT_DIR / "eclass_family_clean.jsonl"
 
 # ECLASS families to keep
 ALLOWED_FAMILIES = {"23", "27", "35", "37", "43", "51"}

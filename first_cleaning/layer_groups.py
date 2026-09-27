@@ -7,13 +7,21 @@ from pathlib import Path
 # CONFIGURATION
 # ============================================================
 
-INPUT_FILE = Path("eclass_family_clean.jsonl")
+# This script lives in first_cleaning/.
+#
+# - Input is read from the same folder as the script.
+# - The generated ECLASS Markdown context files are written to the
+#   project's context_files/ folder, which is where the stage scripts
+#   (src/stage_*.py via src/config.py) expect to find them.
+SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = SCRIPT_DIR.parent
 
-#context files 
-FAMILIES_FILE = Path("families.md")
-GROUPS_FILE = Path("groups.md")
-SUBGROUPS_FILE = Path("subgroups.md")
-ITEMS_FILE = Path("items.md")
+INPUT_FILE = SCRIPT_DIR / "eclass_family_clean.jsonl"
+
+FAMILIES_FILE = PROJECT_ROOT / "context_files" / "families.md"
+GROUPS_FILE = PROJECT_ROOT / "context_files" / "groups.md"
+SUBGROUPS_FILE = PROJECT_ROOT / "context_files" / "subgroups.md"
+ITEMS_FILE = PROJECT_ROOT / "context_files" / "items.md"
 
 
 # ============================================================

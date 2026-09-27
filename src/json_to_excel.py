@@ -2,9 +2,11 @@ import json
 import pandas as pd
 from pathlib import Path
 
+from config import STAGE_4_OUTPUT
 
-INPUT_FILE = Path("outputs/stage_4_items.jsonl")
-OUTPUT_FILE = Path("outputs/eclass_final.xlsx")
+
+INPUT_FILE = STAGE_4_OUTPUT
+OUTPUT_FILE = INPUT_FILE.with_name("eclass_final.xlsx")
 
 
 rows = []

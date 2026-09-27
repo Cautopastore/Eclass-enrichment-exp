@@ -1,3 +1,0 @@
-add another filter between levels to check for the confidence to be over .8 e.g. otherwise skip
-IMPLEMENTED ON STAGE 3 , CONFIDENCE THRESHOLD ON CONFIG
-
