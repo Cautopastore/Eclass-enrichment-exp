@@ -1,0 +1,10 @@
+# secrets
+.env
+
+# python
+.venv/
+__pycache__/
+*.py[cod]
+
+# local outputs
+outputs/

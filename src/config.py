@@ -1,5 +1,7 @@
-
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 
 # ============================================================
@@ -11,6 +13,10 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_DIR.parent
 
+# Load secrets from the .env file at the project root.
+# Absolute path, so it works no matter which folder you run the script from.
+load_dotenv(PROJECT_ROOT / ".env")
+    
 # ECLASS context files
 FAMILIES_FILE = PROJECT_ROOT / "context_files" / "families.md"
 GROUPS_FILE = PROJECT_ROOT / "context_files" / "groups.md"
@@ -31,11 +37,15 @@ STAGE_4_OUTPUT = PROJECT_ROOT / "outputs" / "stage_4_items.jsonl"
 # DEEPSEEK
 # ============================================================
 
-DEEPSEEK_API_KEY = "sk-e9983f8733854bf6be1a6dafa56f8b6d"
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+if not DEEPSEEK_API_KEY:
+    raise RuntimeError(
+        "DEEPSEEK_API_KEY is not set. Create a .env file at the project root "
+        "with DEEPSEEK_API_KEY=<your key>."
+    )
 
-DEEPSEEK_BASE_URL = "https://api.deepseek.com"
-
-DEEPSEEK_MODEL = "deepseek-v4-flash"
+DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-v4-flash")
 
 # ============================================================
 # Confidence threshold filtering between stages
