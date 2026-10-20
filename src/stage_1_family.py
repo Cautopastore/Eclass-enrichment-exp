@@ -1,29 +1,29 @@
 
 import json
+import os
 import time
 
 import pandas as pd
-from openai import OpenAI
 
 from config import (
     COMPONENTS_FILE,
     FAMILIES_FILE,
     STAGE_1_OUTPUT,
-    DEEPSEEK_API_KEY,
-    DEEPSEEK_BASE_URL,
-    DEEPSEEK_MODEL,
     MAX_RETRIES,
     RETRY_DELAY,
+    get_client,
+    DEFAULT_PROVIDER,
+    PROVIDER_ENV_VAR,
+    chat_json,
 )
 
 
 # ============================================================
-# DEEPSEEK CLIENT
+# LLM CLIENT
 # ============================================================
 
-client = OpenAI(
-    api_key=DEEPSEEK_API_KEY,
-    base_url=DEEPSEEK_BASE_URL,
+client, MODEL = get_client(
+    os.getenv(PROVIDER_ENV_VAR, DEFAULT_PROVIDER)
 )
 
 
@@ -202,8 +202,9 @@ Rules:
 
         try:
 
-            response = client.chat.completions.create(
-                model=DEEPSEEK_MODEL,
+            result = chat_json(
+                client,
+                MODEL,
                 messages=[
                     {
                         "role": "system",
@@ -217,14 +218,7 @@ Rules:
                         "content": prompt,
                     },
                 ],
-                response_format={
-                    "type": "json_object"
-                },
             )
-
-            content = response.choices[0].message.content
-
-            result = json.loads(content)
 
             # ------------------------------------------------
             # Validate response
@@ -321,6 +315,8 @@ try:
 
         if not component_description:
 
+            # Empty component: nothing to classify. Persist it so it
+            # is not retried on the next run.
             result = {
                 "family_id": None,
                 "family_name": None,
@@ -336,7 +332,15 @@ try:
             )
 
             if result["family_id"] is None:
+
+                # API / classification failure: do NOT persist, so
+                # this row is retried on the next run.
                 failed += 1
+                print(
+                    "  ⚠ classification failed — "
+                    "not saved, will retry next run"
+                )
+                continue
 
         # ----------------------------------------------------
         # Build output

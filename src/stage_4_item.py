@@ -1,31 +1,30 @@
 
 import json
+import os
 import time
 import re
-
-from openai import OpenAI
 
 from config import (
     ITEMS_FILE,
     STAGE_3_OUTPUT,
     STAGE_4_OUTPUT,
-    DEEPSEEK_API_KEY,
-    DEEPSEEK_BASE_URL,
-    DEEPSEEK_MODEL,
     MAX_RETRIES,
     RETRY_DELAY,
-    CONFIDENCE_THRESHOLD
+    CONFIDENCE_THRESHOLD,
+    get_client,
+    DEFAULT_PROVIDER,
+    PROVIDER_ENV_VAR,
+    chat_json,
 )
 
 
 
 # ============================================================
-# DeepSeek client
+# LLM client
 # ============================================================
 
-client = OpenAI(
-    api_key=DEEPSEEK_API_KEY,
-    base_url=DEEPSEEK_BASE_URL,
+client, MODEL = get_client(
+    os.getenv(PROVIDER_ENV_VAR, DEFAULT_PROVIDER)
 )
 
 
@@ -225,8 +224,9 @@ CANDIDATE ITEMS:
 
         try:
 
-            response = client.chat.completions.create(
-                model=DEEPSEEK_MODEL,
+            result = chat_json(
+                client,
+                MODEL,
                 messages=[
                     {
                         "role": "system",
@@ -237,14 +237,7 @@ CANDIDATE ITEMS:
                         "content": user_prompt,
                     },
                 ],
-                response_format={
-                    "type": "json_object"
-                },
             )
-
-            content = response.choices[0].message.content
-
-            result = json.loads(content)
 
             # ------------------------------------------------
             # Validate required fields
@@ -619,6 +612,20 @@ def main():
             )
 
             # -----------------------------------------------
+            # API / classification failure: do NOT persist,
+            # so this row is retried on the next run.
+            # -----------------------------------------------
+
+            if classification["item_id"] is None:
+
+                failed += 1
+                print(
+                    "  ⚠ item classification failed — "
+                    "not saved, will retry next run"
+                )
+                continue
+
+            # -----------------------------------------------
             # Preserve Stage 3 data
             # -----------------------------------------------
 
@@ -651,23 +658,17 @@ def main():
 
             processed_this_run += 1
 
-            if classification["item_id"] is None:
+            print(
+                f"  → Item: "
+                f"{classification['item_id']} "
+                f"— "
+                f"{classification['item_name']}"
+            )
 
-                failed += 1
-
-            else:
-
-                print(
-                    f"  → Item: "
-                    f"{classification['item_id']} "
-                    f"— "
-                    f"{classification['item_name']}"
-                )
-
-                print(
-                    f"  → Confidence: "
-                    f"{classification['confidence']:.3f}"
-                )
+            print(
+                f"  → Confidence: "
+                f"{classification['confidence']:.3f}"
+            )
 
     except KeyboardInterrupt:
 

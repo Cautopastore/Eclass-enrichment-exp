@@ -1,28 +1,28 @@
 import json
+import os
 import time
 import re
 import pandas as pd
-from openai import OpenAI
 
 from config import (
     GROUPS_FILE,
     STAGE_1_OUTPUT,
     STAGE_2_OUTPUT,
-    DEEPSEEK_API_KEY,
-    DEEPSEEK_BASE_URL,
-    DEEPSEEK_MODEL,
     MAX_RETRIES,
     RETRY_DELAY,
+    get_client,
+    DEFAULT_PROVIDER,
+    PROVIDER_ENV_VAR,
+    chat_json,
 )
 
 
 # ============================================================
-# DeepSeek client
+# LLM client
 # ============================================================
 
-client = OpenAI(
-    api_key=DEEPSEEK_API_KEY,
-    base_url=DEEPSEEK_BASE_URL,
+client, MODEL = get_client(
+    os.getenv(PROVIDER_ENV_VAR, DEFAULT_PROVIDER)
 )
 
 
@@ -197,8 +197,9 @@ CANDIDATE GROUPS:
     for attempt in range(1, MAX_RETRIES + 1):
 
         try:
-            response = client.chat.completions.create(
-                model=DEEPSEEK_MODEL,
+            result = chat_json(
+                client,
+                MODEL,
                 messages=[
                     {
                         "role": "system",
@@ -209,14 +210,7 @@ CANDIDATE GROUPS:
                         "content": user_prompt,
                     },
                 ],
-                response_format={
-                    "type": "json_object"
-                },
             )
-
-            content = response.choices[0].message.content
-
-            result = json.loads(content)
 
             # ------------------------------------------------
             # Validate required fields
@@ -509,6 +503,20 @@ def main():
             )
 
             # -----------------------------------------------
+            # API / classification failure: do NOT persist,
+            # so this row is retried on the next run.
+            # -----------------------------------------------
+
+            if classification["group_id"] is None:
+
+                failed += 1
+                print(
+                    "  ⚠ group classification failed — "
+                    "not saved, will retry next run"
+                )
+                continue
+
+            # -----------------------------------------------
             # Preserve everything from Stage 1
             # and append Stage 2 information
             # -----------------------------------------------
@@ -542,20 +550,16 @@ def main():
 
             processed_this_run += 1
 
-            if classification["group_id"] is None:
-                failed += 1
+            print(
+                f"  → Group: "
+                f"{classification['group_id']} "
+                f"— {classification['group_name']}"
+            )
 
-            else:
-                print(
-                    f"  → Group: "
-                    f"{classification['group_id']} "
-                    f"— {classification['group_name']}"
-                )
-
-                print(
-                    f"  → Confidence: "
-                    f"{classification['confidence']:.3f}"
-                )
+            print(
+                f"  → Confidence: "
+                f"{classification['confidence']:.3f}"
+            )
 
     except KeyboardInterrupt:
 
